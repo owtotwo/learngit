@@ -23,6 +23,7 @@ start from 0, width 8_），每个字节以一个空格隔开，行末允许有�
 ##  Reference ##
 * https://en.wikipedia.org/wiki/Hex_dump
 * http://lxr.free-electrons.com/source/lib/hexdump.c
+* http://zh-google-styleguide.readthedocs.io/en/latest/google-cpp-styleguide/contents/
 
 ---
 ## Deadline ##
