@@ -12,7 +12,7 @@ start from 0, width 8 by default_），每个字节后跟一个空格。
 则显示``Cannot open the file 'filename' .``。（'filename'为具体文件路径, num为行首字节显示的width）
 * 请自行在Linux系统下的diff（或使用git的diff）来测试你的程序`./hex_viewer <file>`
 和`hexdump -C <file>`输出结果是否一致。
-
+* 请注意需要测试能否打开超过2G以上的大型文件，不要求等待全部输出，只需要能不断输出内容就可以。（行为等价于hexdump）
 ---
 ## Sample ##
 * Data File:
