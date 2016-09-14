@@ -23,7 +23,6 @@ the output is the same as the comment in [main.c](./main.c).
 * http://www.cplusplus.com/reference/vector/vector/
 * http://en.cppreference.com/w/cpp/container/vector
 * https://en.wikipedia.org/wiki/Dynamic_array
-* https://google.github.io/styleguide/cppguide.html
 
 ### Deadline ###
 * `2016-09-11`

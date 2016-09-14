@@ -1,5 +1,5 @@
 # Task 3 #
-`Release: 2016-09-14/12:17`
+`Release: 2016-09-14/12:16`
 
 ---
 ## 仿照hexdump(Unix)改进十六进制文件查看器（hex_viewer）##
@@ -31,7 +31,6 @@ start from 0, width 8 by default_），每个字节后跟一个空格。
 * https://en.wikipedia.org/wiki/Hex_dump
 * http://lxr.free-electrons.com/source/lib/hexdump.c
 * https://www.freebsd.org/cgi/man.cgi?query=hexdump&sektion=1
-* http://zh-google-styleguide.readthedocs.io/en/latest/google-cpp-styleguide/contents/
 
 ---
 ## Deadline ##

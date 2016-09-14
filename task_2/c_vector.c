@@ -10,9 +10,6 @@
 // Returns the largest of x and y.
 #define MAX(x, y) /* Your code here. */
 
-// You can take the place of two functions below by memmove in <string.h>, or
-// challenge yourself by the implementations of them.
-
 // Copy the values of n bytes from the location pointed to by source (src)
 //    directly to the memory block pointed to by destination (dst).
 // It does support overlapping buffers, but it is only safe when dst > src, so
@@ -20,14 +17,7 @@
 // For speedy copying, optimize the common case where both pointers and the
 //    length are word-aligned, and copy word-at-a-time instead of
 //    byte-at-a-time. Otherwise, copy by bytes. (Optional)
-static inline void* memcpy_backward(void* dst, const void* src, size_t n) {
-    /* Your code here. */
-    return dst;
-}
-
-// It is safe for the overlapping buffers unlike the memcpy in <string.h>.
-// You should make sure that dst < src before you call this.
-static inline void* memcpy_forward(void* dst, const void* src, size_t n) {
+static inline void* memcpy_backward(void * dst, const void * src, size_t n) {
     /* Your code here. */
     return dst;
 }
