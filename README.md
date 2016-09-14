@@ -1,2 +1,2 @@
-# learngit
-For Git Learning
+# Teaching #
+For Teaching
