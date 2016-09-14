@@ -1,5 +1,5 @@
 # Task 3 #
-`Release: 2016-09-14/12:17`
+`Release: 2016-09-14/12:16`
 
 ---
 ## 仿照hexdump(Unix)改进十六进制文件查看器（hex_viewer）##
@@ -9,10 +9,10 @@
 start from 0, width 8 by default_），每个字节后跟一个空格。
 * 并在每行行末输出空格后用两条竖线中间的位置输出当前行的字节对应的字符内容，如果为控制字符则输出'.'。
 * 如果命令行输入参数有误，则显示具体参数用法 ``Usage: ./hex_viewer <file> [<num>]``；如果读取文件失败，
-则显示``Cannot open the file 'filename' .``。（'filename'为具体文件路径, num为行首字节显示的width）
+则显示``Cannot open the file 'filename' .``。（'filename'为具体文件路径, num为行首字节显示的最少width）
 * 请自行在Linux系统下的diff（或使用git的diff）来测试你的程序`./hex_viewer <file>`
 和`hexdump -C <file>`输出结果是否一致。
-
+* 请注意需要测试能否打开超过2G以上的大型文件，不要求等待全部输出，只需要能不断输出内容就可以。（行为等价于hexdump）
 ---
 ## Sample ##
 * Data File:
@@ -31,7 +31,6 @@ start from 0, width 8 by default_），每个字节后跟一个空格。
 * https://en.wikipedia.org/wiki/Hex_dump
 * http://lxr.free-electrons.com/source/lib/hexdump.c
 * https://www.freebsd.org/cgi/man.cgi?query=hexdump&sektion=1
-* http://zh-google-styleguide.readthedocs.io/en/latest/google-cpp-styleguide/contents/
 
 ---
 ## Deadline ##
