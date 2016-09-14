@@ -1,5 +1,5 @@
 # Task 3 #
-`Release: 2016-09-14`
+`Release: 2016-09-14/12:17`
 
 ---
 ## 仿照hexdump(Unix)改进十六进制文件查看器（hex_viewer）##
@@ -34,4 +34,4 @@ start from 0, width 8 by default_），每个字节后跟一个空格。
 
 ---
 ## Deadline ##
-	 2016-09-03/15:00
+	 2016-09-15/15:00
