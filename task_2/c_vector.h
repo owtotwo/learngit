@@ -75,7 +75,7 @@ extern "C" {
     //    reallocation of the allocated storage space takes place.
     void vec_resize(Vector* vec, size_t n, value_type val);
 
-    // Return whether the vector is empty.(1 means true and 0 means false.)
+    // Return a value different from zero if it is empty.
     int vec_empty(Vector* vec);
 
     // Requests that the vector capacity be at least enough to contain n
