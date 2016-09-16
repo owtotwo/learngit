@@ -9,114 +9,116 @@
 #include <stdio.h>
 #include <assert.h>
 
+#define C_VECTOR_VALUE_TYPE double
 #include "c_vector.h"
 
 // Output all elements in vector in pretty format.
-void vec_print(Vector* vec, const char* name) {
+void vec_double_print(Vector_double* vec, const char* name) {
     printf("  %s: {", name);
-	for (size_t i = 0; i < vec_size(vec); i++) {
-        if (i != 0) printf(", "); 
-		printf("%d", vec_get(vec, i));
+	for (size_t i = 0; i < vec_double_size(vec); i++) {
+        if (i != 0) printf(", ");
+		printf("%lf", vec_double_get(vec, i));
 	}
 	printf("}\n");
 }
 
 int main() {
-    Vector *vec_1 = NULL, *vec_2 = NULL;
+    Vector_double *vec_double_1 = NULL, *vec_double_2 = NULL;
 
-    create_vector(&vec_1);
+    create_vector_double(&vec_double_1);
     printf("create vector 1 Done.\n");
-    vec_2 = create_vector(NULL);
-    printf("create_vector 2 Done.\n");
+    vec_double_2 = create_vector_double(NULL);
+    printf("create_vector_double 2 Done.\n");
 
-    printf("vec_1 size is %lu\n", vec_size(vec_1));
-    printf("vec_2 size is %lu\n", vec_size(vec_2));
+    printf("vec_double_1 size is %lu\n", vec_double_size(vec_double_1));
+    printf("vec_double_2 size is %lu\n", vec_double_size(vec_double_2));
 
-    printf("vec_1 capacity is %lu\n", vec_capacity(vec_1));
-    printf("vec_2 capacity is %lu\n", vec_capacity(vec_2));
+    printf("vec_double_1 capacity is %lu\n", vec_double_capacity(vec_double_1));
+    printf("vec_double_2 capacity is %lu\n", vec_double_capacity(vec_double_2));
 
     // compound literal
-    vec_assign(vec_1, 10, (value_type[]){1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+    vec_double_assign(vec_double_1, 10, (C_VECTOR_VALUE_TYPE[]){1, 2, 3, 4, 5, 
+                                                  6, 7, 8, 9, 10});
     // get pointer of data
-    vec_assign(vec_2, 5, vec_data(vec_1));
-    vec_assign(vec_2, 5, vec_data(vec_1) + 2);
+    vec_double_assign(vec_double_2, 5, vec_double_data(vec_double_1));
+    vec_double_assign(vec_double_2, 5, vec_double_data(vec_double_1) + 2);
 
-    printf("vec_assign Done.\n");
-    vec_print(vec_1, "vec_1"); // {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-    vec_print(vec_2, "vec_2"); // {3, 4, 5, 6, 7}
+    printf("vec_double_assign Done.\n");
+    vec_double_print(vec_double_1, "vec_double_1"); // {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+    vec_double_print(vec_double_2, "vec_double_2"); // {3, 4, 5, 6, 7}
 
-    assert(*vec_data(vec_2) == vec_get(vec_2, 0));
-    printf("vec_data Done.\n");
+    assert(*vec_double_data(vec_double_2) == vec_double_get(vec_double_2, 0));
+    printf("vec_double_data Done.\n");
 
-    vec_set(vec_1, 0, 99);
-    assert(vec_get(vec_1, 0) == 99);
-    assert(vec_get(vec_2, 0) == 3);
-    printf("vec_set Done.\n");    
-    printf("vec_get Done.\n");
+    vec_double_set(vec_double_1, 0, 99);
+    assert(vec_double_get(vec_double_1, 0) == 99);
+    assert(vec_double_get(vec_double_2, 0) == 3);
+    printf("vec_double_set Done.\n");    
+    printf("vec_double_get Done.\n");
 
-    assert(vec_front(vec_1) == 99);
-    printf("vec_front Done.\n");
+    assert(vec_double_front(vec_double_1) == 99);
+    printf("vec_double_front Done.\n");
     
-    assert(vec_back(vec_2) == 7);
-    printf("vec_back Done.\n");
+    assert(vec_double_back(vec_double_2) == 7);
+    printf("vec_double_back Done.\n");
 
-    vec_push_back(vec_2, -1);
-    vec_push_back(vec_2, 0);
-    assert(vec_size(vec_2) == 7);
-    printf("vec_push_back Done.\n");
+    vec_double_push_back(vec_double_2, -1);
+    vec_double_push_back(vec_double_2, 0);
+    assert(vec_double_size(vec_double_2) == 7);
+    printf("vec_double_push_back Done.\n");
 
-    vec_pop_back(vec_1);
-    assert(vec_size(vec_1) == 9);
-    printf("vec_pop_back Done.\n");
+    vec_double_pop_back(vec_double_1);
+    assert(vec_double_size(vec_double_1) == 9);
+    printf("vec_double_pop_back Done.\n");
 
-    vec_print(vec_1, "vec_1"); // {99, 2, 3, 4, 5, 6, 7, 8, 9}
-    vec_print(vec_2, "vec_2"); // {3, 4, 5, 6, 7, -1, 0}
+    vec_double_print(vec_double_1, "vec_double_1"); // {99, 2, 3, 4, 5, 6, 7, 8, 9}
+    vec_double_print(vec_double_2, "vec_double_2"); // {3, 4, 5, 6, 7, -1, 0}
     
-    vec_erase(vec_1, 2, 5);
-    assert(vec_size(vec_1) == 4);
-    vec_erase(vec_2, 0, 4);
-    assert(vec_size(vec_2) == 3);
+    vec_double_erase(vec_double_1, 2, 5);
+    assert(vec_double_size(vec_double_1) == 4);
+    vec_double_erase(vec_double_2, 0, 4);
+    assert(vec_double_size(vec_double_2) == 3);
 
-    vec_insert(vec_1, 0, 2, (value_type[]){-99, -100});
-    vec_insert(vec_2, 3, 1, (value_type[]){1});
-    vec_insert(vec_2, 1, 2, (value_type[]){22, 40});
+    vec_double_insert(vec_double_1, 0, 2, (C_VECTOR_VALUE_TYPE[]){-99, -100});
+    vec_double_insert(vec_double_2, 3, 1, (C_VECTOR_VALUE_TYPE[]){1});
+    vec_double_insert(vec_double_2, 1, 2, (C_VECTOR_VALUE_TYPE[]){22, 40});
 
-    vec_print(vec_1, "vec_1"); // {-99, -100, 99, 2, 8, 9}
-    vec_print(vec_2, "vec_2"); // {7, 22, 40, -1, 0, 1}
-    printf("vec_insert Done.\n");
+    vec_double_print(vec_double_1, "vec_double_1"); // {-99, -100, 99, 2, 8, 9}
+    vec_double_print(vec_double_2, "vec_double_2"); // {7, 22, 40, -1, 0, 1}
+    printf("vec_double_insert Done.\n");
 
-    vec_clear(vec_1);
-    vec_print(vec_1, "vec_1"); // {}
-    printf("vec_clear Done.\n");
+    vec_double_clear(vec_double_1);
+    vec_double_print(vec_double_1, "vec_double_1"); // {}
+    printf("vec_double_clear Done.\n");
 
-    destroy_vector(&vec_1);
-    copy_vector(vec_2, &vec_1);
-    vec_print(vec_1, "vec_1"); // {7, 22, 40, -1, 0, 1}
+    destroy_vector_double(&vec_double_1);
+    copy_vector_double(vec_double_2, &vec_double_1);
+    vec_double_print(vec_double_1, "vec_double_1"); // {7, 22, 40, -1, 0, 1}
     printf("Destroy vector Done.\n");
     printf("Copy vector Done.\n");
 
-    vec_resize(vec_1, 10, 0);
-    vec_print(vec_1, "vec_1"); // {7, 22, 40, -1, 0, 1, 0, 0, 0, 0}
+    vec_double_resize(vec_double_1, 10, 0);
+    vec_double_print(vec_double_1, "vec_double_1"); // {7, 22, 40, -1, 0, 1, 0, 0, 0, 0}
 
-    for (size_t i = 0; i < vec_size(vec_1); i++)
-        vec_set(vec_1, i, i);
+    for (size_t i = 0; i < vec_double_size(vec_double_1); i++)
+        vec_double_set(vec_double_1, i, i);
 
-    vec_print(vec_1, "vec_1"); // {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+    vec_double_print(vec_double_1, "vec_double_1"); // {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 
     for (size_t i = 10; i < 100; i++)
-        vec_push_back(vec_1, i);
+        vec_double_push_back(vec_double_1, i);
 
-    assert(vec_size(vec_1) == 100);
+    assert(vec_double_size(vec_double_1) == 100);
 
-    value_type *p = vec_data(vec_1);
-    for (size_t i = 0; i < vec_size(vec_1); i++)
+    C_VECTOR_VALUE_TYPE *p = vec_double_data(vec_double_1);
+    for (size_t i = 0; i < vec_double_size(vec_double_1); i++)
         assert(p[i] == i);
 
-    printf("vec_1 capacity is %lu\n", vec_capacity(vec_1));
-    printf("vec_2 capacity is %lu\n", vec_capacity(vec_2));
+    printf("vec_double_1 capacity is %lu\n", vec_double_capacity(vec_double_1));
+    printf("vec_double_2 capacity is %lu\n", vec_double_capacity(vec_double_2));
 
-    destroy_vector(&vec_1);
-    destroy_vector(&vec_2);
+    destroy_vector_double(&vec_double_1);
+    destroy_vector_double(&vec_double_2);
 
     printf("\n[All Done].\n\n");
 

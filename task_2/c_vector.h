@@ -8,121 +8,167 @@
  * For details: http://www.cplusplus.com/reference/vector/vector/
  */
 
-// You should not modify this file.
+// Macros for concatenating tokens
+#define AUX__CAT_TOKEN_IN_MACRO(A, B) A##B
+#define CAT_TOKEN_IN_MACRO(A, B) AUX__CAT_TOKEN_IN_MACRO(A, B)
 
-#ifndef TASK_C_VECTOR_H_
-#define TASK_C_VECTOR_H_
+#if !defined(CAT_TOKEN_IN_MACRO(TASK_C_VECTOR_H_FOR_TYPE__, C_VECTOR_VALUE_TYPE))
+#define (CAT_TOKEN_IN_MACRO(TASK_C_VECTOR_H_FOR_TYPE__, C_VECTOR_VALUE_TYPE))
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include <stddef.h>
+#include <stdlib.h> // for malloc, free, NULL
+#include <stdint.h> // for uintptr_t
+#include <string.h> // for memset, memmove, memcpy
+
 
 /* Definition of some constant values */
+#define C_VECTOR_GROWTH_RATE    2       // double size every reallocation
 
-#define C_VECTOR_VALUE_TYPE     int       // may be double or any struct
-#define C_VECTOR_GROWTH_RATE    2         // double size every reallocation
-
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
 /*-- Definition of the struction of C vector --*/
+#define value_t C_VECTOR_VALUE_TYPE
+#define AUX__VEC_(T) Vector_##T
+#define VEC_(T) AUX__VEC_(T)
 
-    typedef C_VECTOR_VALUE_TYPE value_type;
-
-    typedef struct {
-        size_t count; // used size
-        size_t capacity; // data[] size
-        value_type* data; // the pointer of array which stores the elements
-    } Vector;
-
-
-/*-- initialization and destruction of C vector --*/
-
-    // Create a vector and initialize it.  It will allocate the memory and
-    //    return the pointer of Vector, and if the argument is not a null
-    //    pointer, it also sets this value to the object pointed.
-    Vector* create_vector(Vector** vec);
-
-    // Destroy a vector which had been created.  It will deallocate the memory
-    //    and if vec is a null pointer, the function does nothing.
-    void destroy_vector(Vector** vec);
-
-    // Create a vector on *vec and copy all the elements from vec_src to it.
-    // It will allocate the memory and return the pointer of Vector, and if
-    //    the second argument is not a null pointer, it also sets this value
-    //    to the object pointed.
-    Vector* copy_vector(Vector* vec_src, Vector** vec);
+typedef struct {
+    size_t count; // used size
+    size_t capacity; // data[] size
+    value_t* data; // the pointer of array which stores the elements
+} VEC_(value_t);
 
 
-/*-- member functions of C vector --*/
+/*-- Implementation detials --*/
+#define AUX__VECTOR_IMPLEMENTATION(T) \
+\
+VEC_(value_t)* create_vector_##T(VEC_(value_t)** vec_ptr) {\
+    VEC_(value_t)* ptr = (VEC_(value_t)*)malloc(sizeof(VEC_(value_t)));\
+    ptr->count = 0;\
+    ptr->capacity = 0;\
+    ptr->data = (value_t*)malloc(0);\
+    if (vec_ptr != NULL) *vec_ptr = ptr;\
+    return ptr;\
+}\
+\
+void destroy_vector_##T(VEC_(value_t)** vec_ptr) {\
+    if (vec_ptr != NULL) {\
+        free((void*)((*vec_ptr)->data));\
+        free((void*)*vec_ptr);\
+        *vec_ptr = NULL;\
+    }\
+}\
+\
+size_t vec_##T##_size(VEC_(value_t)* vec) {\
+    return vec->count;\
+}\
+\
+value_t* vec_##T##_data(VEC_(value_t)* vec) {\
+    return vec->data;\
+}\
+\
+size_t vec_##T##_capacity(VEC_(value_t)* vec) {\
+    return vec->capacity;\
+}\
+\
+void vec_##T##_reserve(VEC_(value_t)* vec, size_t n) {\
+    if (vec_##T##_capacity(vec) < n) {\
+        vec->data = (value_t*)realloc((void*)vec->data, n * sizeof(value_t));\
+        vec->capacity = n;\
+    }\
+}\
+\
+void vec_##T##_assign(VEC_(value_t)* vec, size_t size, value_t vals[]) {\
+    vec_##T##_reserve(vec, size);\
+    memcpy((void*)vec->data, (const void*)vals, size * sizeof(value_t));\
+    vec->count = size;\
+}\
+\
+VEC_(value_t)* copy_vector_##T(VEC_(value_t)* vec_src, VEC_(value_t)** vec_ptr) {\
+    VEC_(value_t)* ptr = create_vector_##T(NULL);\
+    vec_##T##_assign(ptr, vec_##T##_size(vec_src), vec_##T##_data(vec_src));\
+    if (vec_ptr != NULL) *vec_ptr = ptr;\
+    return ptr;\
+}\
+\
+void vec_##T##_erase(VEC_(value_t)* vec, size_t n, size_t size) {\
+    memmove((void*)(vec->data + n),\
+           (const void*)(vec->data + n + size),\
+           (vec_##T##_size(vec) - n - size) * sizeof(value_t));\
+    vec->count -= size;\
+}\
+\
+void vec_##T##_resize(VEC_(value_t)* vec, size_t n, value_t val) {\
+    size_t current_size = vec_##T##_size(vec);\
+    if (n < current_size) {\
+        vec_##T##_erase(vec, n, current_size - n);\
+    } else if (n > current_size) {\
+        vec_##T##_reserve(vec, n);\
+        for (size_t i = current_size; i < n; i++)\
+            vec->data[i] = val;\
+        vec->count = n;\
+    }\
+}\
+\
+int vec_##T##_empty(VEC_(value_t)* vec) {\
+    return vec_##T##_size(vec) == 0;\
+}\
+\
+value_t vec_##T##_get(VEC_(value_t)* vec, size_t n) {\
+    return vec->data[n];\
+}\
+\
+void vec_##T##_set(VEC_(value_t)* vec, size_t n, value_t val) {\
+    vec->data[n] = val;\
+}\
+\
+void vec_##T##_insert(VEC_(value_t)* vec, size_t n, size_t size, value_t vals[]) {\
+    size_t required_size = vec_##T##_size(vec) + size;\
+    size_t new_size = MAX(required_size, C_VECTOR_GROWTH_RATE * vec_##T##_size(vec));\
+    vec_##T##_reserve(vec, new_size);\
+    memmove((void*)(vec->data + n + size),\
+                    (const void*)(vec->data + n),\
+                    (vec_##T##_size(vec) - n) * sizeof(value_t));\
+    memcpy((void*)(vec->data + n),\
+           (const void*)vals,\
+           size * sizeof(value_t));\
+    vec->count += size;\
+}\
+\
+void vec_##T##_push_back(VEC_(value_t)* vec, value_t val) {\
+    vec_##T##_insert(vec, vec_##T##_size(vec), 1, &val);\
+}\
+\
+value_t vec_##T##_front(VEC_(value_t)* vec) {\
+    return vec->data[0];\
+}\
+\
+value_t vec_##T##_back(VEC_(value_t)* vec) {\
+    return vec->data[vec_##T##_size(vec) - 1];\
+}\
+\
+void vec_##T##_pop_back(VEC_(value_t)* vec) {\
+    vec_##T##_erase(vec, vec_##T##_size(vec) - 1, 1);\
+}\
+\
+void vec_##T##_clear(VEC_(value_t)* vec) {\
+    vec_##T##_erase(vec, 0, vec_##T##_size(vec));\
+}
 
-    // Return the size of element in the vector.
-    size_t vec_size(Vector* vec);
 
-    // Return the capacity of the storage space currently allocated for the
-    //    vector, expressed in terms of elements.
-    size_t vec_capacity(Vector* vec);
+#define VECTOR_IMPLEMENTATION(T) AUX__VECTOR_IMPLEMENTATION(T)
 
-    // Resize the container so that it contains n elements.
-    // If n is smaller than the current container size, the content is reduced
-    //    to its first n elements, removing those beyond (but will not ensure
-    //    to destroy them).
-    // If n is greater than the current container size, the content is expanded
-    //    by inserting at the end as many elements as needed to reach a size of
-    //    n. The new elements are initialized as copies of val.
-    // If n is also greater than the current container capacity, an automatic
-    //    reallocation of the allocated storage space takes place.
-    void vec_resize(Vector* vec, size_t n, value_type val);
+VECTOR_IMPLEMENTATION(value_t)
 
-    // Return a value different from zero if it is empty.
-    int vec_empty(Vector* vec);
-
-    // Requests that the vector capacity be at least enough to contain n
-    //    elements.
-    void vec_reserve(Vector* vec, size_t n);
-
-    // Return the value of element in position n in the vector.
-    value_type vec_get(Vector* vec, size_t n);
-
-    // Set the value of element in position n in the vector.
-    void vec_set(Vector* vec, size_t n, value_type val);
-
-    // Assigns new contents to the vector, replacing its current contents, and
-    //    modifying its size accordingly.
-    void vec_assign(Vector* vec, size_t size, value_type vals[]);
-
-    // Extend the vector by inserting new elements before the element at
-    //    the specified position in vector.
-    void vec_insert(Vector* vec, size_t n, size_t size, value_type vals[]);
-
-    // Add a new element at the end of the vector, after its current last
-    //    element. 
-    void vec_push_back(Vector* vec, value_type val);
-
-    // Return the value of the first element in the vector.
-    value_type vec_front(Vector* vec);
-
-    // Return the value of the the last element in the vector.
-    value_type vec_back(Vector* vec);
-
-    // Removes from the vector a range of elements in [n, n + size).
-    void vec_erase(Vector* vec, size_t n, size_t size);
-
-    // Remove the last element in the vector, effectively reducing the
-    //    container size by one.
-    void vec_pop_back(Vector* vec);
-
-    // Remove all elements from the vector (which are destroyed), leaving
-    //    the container with a size of 0.
-    void vec_clear(Vector* vec);
-
-    // Return a direct pointer to the memory array used internally by the vector
-    //    to store its owned elements.
-    value_type* vec_data(Vector* vec);
-
+#undef value_t
+#undef AUX__VEC_
+#undef VEC_
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // TASK_C_VECTOR_H_
+#endif // TASK_C_VECTOR_H_FOR_TYPE__*ANY_TYPE*
