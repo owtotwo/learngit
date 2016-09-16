@@ -21,9 +21,8 @@ extern "C" {
 
 /* Definition of some constant values */
 
-#define C_VECTOR_VALUE_TYPE     int
-#define C_VECTOR_MAX_SIZE       (size_t(-1) / sizeof(C_VECTOR_VALUE_TYPE) - 1)
-#define C_VECTOR_GROWTH_RATE    2
+#define C_VECTOR_VALUE_TYPE     int       // may be double or any struct
+#define C_VECTOR_GROWTH_RATE    2         // double size every reallocation
 
 
 /*-- Definition of the struction of C vector --*/
