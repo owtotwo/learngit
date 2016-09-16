@@ -1,0 +1,12 @@
+# obj
+*.o
+*.obj
+
+*.so
+*.dll
+*.a
+
+*.exe
+*.out
+
+**/.vscode/
