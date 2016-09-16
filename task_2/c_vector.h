@@ -22,7 +22,7 @@ extern "C" {
 /* Definition of some constant values */
 
 #define C_VECTOR_VALUE_TYPE     int
-#define C_VECTOR_MAX_SIZE       (size_t(-1) / sizeof(C_VECTOR_VALUE_TYPE) - 1)
+#define C_VECTOR_MAX_SIZE       ((size_t)(-1) / sizeof(C_VECTOR_VALUE_TYPE) - 1)
 #define C_VECTOR_GROWTH_RATE    2
 
 
