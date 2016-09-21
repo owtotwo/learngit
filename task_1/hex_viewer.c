@@ -27,7 +27,8 @@ int main(int argc, char* argv[]) {
 		if (i % 16 == 15) putchar('\n');
 	}
 	putchar('\n');
-
+	
+	free(buffer);
 	fclose(fp);
 	return 0;
 }

@@ -8,14 +8,7 @@
 
 using namespace std;
 
-int main(int argc, char* argv[]) {
-	
-	if (argc != 2) {
-		cout << "Usage: hex_viewer [file]" << endl;
-		exit(1);
-	}
-
-
+void func(int argc, char* argv[]) {
 	const string file_addr = argv[1];
 	ifstream fin(file_addr, ifstream::in | ifstream::binary);
 	
@@ -41,6 +34,16 @@ int main(int argc, char* argv[]) {
 
 
 	fin.close();
+}
+
+int main(int argc, char* argv[]) {
+	
+	if (argc != 2) {
+		cout << "Usage: hex_viewer [file]" << endl;
+		exit(1);
+	}
+
+	func(argc, argv);
 	
 	return 0;
 }
