@@ -84,7 +84,7 @@ TEST(C_Vector, Clear_and_Empty) {
     vec_clear(vec);
     EXPECT_EQ(0, vec_size(vec));
     EXPECT_TRUE(vec_empty(vec));
-    EXPECT_GE(10, vec_capacity(vec));
+    EXPECT_GE(vec_capacity(vec), 10);
     destroy_vector(&vec); 
 }
 
