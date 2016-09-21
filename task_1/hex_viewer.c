@@ -19,6 +19,7 @@ int main(int argc, char* argv[]) {
 	fseek(fp, 0, SEEK_SET);
 
 	char* buffer = (char*)malloc(length);
+	if (!buffer) exit(EXIT_FAILURE);
 	fread(buffer, sizeof(char), length, fp);
 
 	for (int i = 0; i < length; i++) {
@@ -30,5 +31,6 @@ int main(int argc, char* argv[]) {
 	
 	free(buffer);
 	fclose(fp);
+
 	return 0;
 }

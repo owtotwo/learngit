@@ -14,7 +14,7 @@ void func(int argc, char* argv[]) {
 	
 	if (!fin.is_open()) {
 		cout << "Cannot open file \"" << file_addr << "\"" << endl;
-		exit(1);
+		return;
 	}
 
 
@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
 	
 	if (argc != 2) {
 		cout << "Usage: hex_viewer [file]" << endl;
-		exit(1);
+		return EXIT_FAILURE;
 	}
 
 	func(argc, argv);
