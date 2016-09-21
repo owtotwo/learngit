@@ -1,14 +1,28 @@
-#include <time.c> // for time
+#ifndef TODOLIST_TODOLISTMODEL_H__
+#define TODOLIST_TODOLISTMODEL_H__
 
-todolist_t
+#include <time.h> // for time
 
-typedef enum item_state {
-    UNKNOWN, FINISHED, UNFINISHED
+typedef enum {
+    UNKNOWN_ITEM_STATE, FINISHED, UNFINISHED
 } item_state_t;
 
-typdef struct {
+typedef struct {
     int id;
     char* content;
     item_state_t state;
     struct tm date;
 } item_t;
+
+typedef struct {
+   item_t** items;
+} todolist_t;
+
+
+void create_item(item_t** item);
+void destroy_item(item_t** item);
+
+void create_todolist(todolist_t** tdl);
+void destroy_todolist(todolist_t** tdl);
+
+#endif // TODOLIST_TODOLISTMODEL_H__

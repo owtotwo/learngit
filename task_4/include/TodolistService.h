@@ -9,6 +9,15 @@
 #ifndef TODOLIST_TODOLISTSERVICE_H__
 #define TODOLIST_TODOLISTSERVICE_H__
 
-int add_item()
+#include "TodolistModel.h"
+
+// Return 0 if Success
+int service_add_item(todolist_t* tdl, const char* content);
+int service_finish_item(todolist_t* tdl, int item_id);
+int service_get_list(todolist_t* tdl, int line_max, const item_t*** item_list,
+                     int* line_size);
+int service_find_item_by_id(todolist_t* tdl, int item_id, const item_t** item);
+int service_find_item_by_keyword(todolist_t* tdl, const char* item_keyword,
+                                 const item_t** item);
 
 #endif // TODOLIST_TODOLISTSERVICE_H__

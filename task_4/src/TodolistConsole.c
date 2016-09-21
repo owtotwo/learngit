@@ -1,55 +1,46 @@
 #include <assert.h> // for assert
+#include <stdio.h> // for printf, getchar
 #include <string.h> // for strcmp, strlen
-#include <stdlib.h> // for strtol
-#include "TodolistUI.h"
-
-typedef enum {
-    UNKNOWN, NONE, LIST, ADD, FINISH, FIND, UPDATE, COMMIT, ROLLBACK
-} cmd_t;
-
-const int DEFAULT_PRINT_LINE_SIZE = 10;
-const char* PRINT_LINE_SIZE_FLAG = "--list";
-const char* PRINT_LINE_SIZE_FLAG_ABBR = "-l";
-const char* ADD_ITEM_FLAG = "--short";
-const char* ADD_ITEM_FLAG_ABBR = "-s";
-const char* FIND_ITEM_BY_ID_FLAG = "--id";
-const char* FIND_ITEM_BY_ID_FLAG_ABBR = "-i"
-const char* FIND_ITEM_BY_KEYWORD_FLAG = "--keyword";
-const char* FIND_ITEM_BY_KEYWORD_FLAG_ABBR = "-k"
-
-
-void abort(const char* err);
+#include <stdlib.h> // for strtol, malloc, free
+#include "TodolistConsole.h"
+#include "TodolistService.h"
+#include "TodolistModel.h"
 
 
 static cmd_t get_command(const char* cmd);
+
 static void print_error(const char* err);
+static void print_info(const char* info);
 static void print_usage(todolist_t* tdl, int argc, char* argv[]);
+
+static int console_run_todolist(todolist_t* tdl, int argc, char* argv[]);
 static void console_print_list_by_default(todolist_t* tdl);
 static void console_print_list(todolist_t* tdl, int argc, char* argv[]);
 static void console_add_item(todolist_t* tdl, int argc, char* argv[]);
 static void console_finish_item(todolist_t* tdl, int argc, char* argv[]);
 static void console_find_item(todolist_t* tdl, int argc, char* argv[]);
 
-static void get_buffer_from_console(const char* buffer);
+static void get_buffer_from_console(char** buffer, size_t* len);
 static void output_list(todolist_t* tdl, int line_max);
-static void output_item(item_t* itm);
+static void output_item(const item_t* item);
+
 
 // Done
-int todolist_ui(int argc, char* argv[]) {
+int todolist_console(int argc, char* argv[]) {
     todolist_t* tdl = NULL;
 
     create_todolist(&tdl);
-    int result = run_todolist(tdl, argc, argv);
+    int result = console_run_todolist(tdl, argc, argv);
     destroy_todolist(&tdl);
 
     return result;
 }
 
 // Done
-int run_todolist(todolist_t* tdl, int argc, char* argv[]) { 
+static int console_run_todolist(todolist_t* tdl, int argc, char* argv[]) { 
     assert(argc > 0);
 
-    cmd_t cmd = UNKNOWN;
+    cmd_t cmd = UNKNOWN_CMD;
 
     if (argc == 1) {
         cmd = NONE;
@@ -58,8 +49,8 @@ int run_todolist(todolist_t* tdl, int argc, char* argv[]) {
     }
     
     switch (cmd) {
-        case UNKNOWN: 
-            print_usage(argc, argv); 
+        case UNKNOWN_CMD: 
+            print_usage(tdl, argc, argv); 
             break;
         case NONE: 
             console_print_list_by_default(tdl);
@@ -95,11 +86,11 @@ static cmd_t get_command(const char* cmd) {
     else if (strcmp(cmd, "find") == 0)
         return FIND;
     else
-        return UNKNOWN;
+        return UNKNOWN_CMD;
 }
 
 
-static void print_usage(int argc, char* argv[]) {
+static void print_usage(todolist_t* tdl, int argc, char* argv[]) {
     printf("Usage: todolist <command> [flag].\n");
 }
 
@@ -120,7 +111,7 @@ static void console_print_list(todolist_t* tdl, int argc, char* argv[]) {
                     return;
                 }
 
-                int* end_ptr = NULL;
+                char* end_ptr = NULL;
                 int line_tmp = strtol(argv[i + 1], &end_ptr, 10);
 
                 if (strlen(argv[i + 1]) == (end_ptr - argv[i + 1])) {
@@ -150,7 +141,7 @@ static void console_print_list_by_default(todolist_t* tdl) {
 static void console_add_item(todolist_t* tdl, int argc, char* argv[]) {
     assert(argc > 1);
 
-    const char* content = NULL;
+    char* content = NULL;
 
     for (int i = 2; i < argc; i++) {
         if (strcmp(argv[i], ADD_ITEM_FLAG_ABBR) == 0 ||
@@ -174,9 +165,11 @@ static void console_add_item(todolist_t* tdl, int argc, char* argv[]) {
     int result = -1; // failed by default
 
     if (content == NULL) {
-        get_buffer_from_console(&content); // it will call malloc
+        size_t buffer_size = 512; // default
+        content = (char*)malloc(buffer_size * sizeof(char));
+        get_buffer_from_console(&content, &buffer_size); // it will call realloc
         result = service_add_item(tdl, content);
-        free(content); // so make sure to free it
+        free(content);
         content = NULL;
     } else {
         result = service_add_item(tdl, content);
@@ -194,7 +187,7 @@ static void console_finish_item(todolist_t* tdl, int argc, char* argv[]) {
     // 可以考虑增加扩展功能 通过关键词定位唯一的item直接finish.
     assert(argc > 1);
 
-    int* end_ptr = NULL;
+    char* end_ptr = NULL;
     int item_id = strtol(argv[3], &end_ptr, 10);
     
     if (strlen(argv[3]) != (end_ptr - argv[3])) {
@@ -212,7 +205,7 @@ static void console_finish_item(todolist_t* tdl, int argc, char* argv[]) {
 static void console_find_item(todolist_t* tdl, int argc, char* argv[]) {
     assert(argc > 1);
 
-    const item_t* itm;
+    const item_t* item;
     int item_id = -1;
     int is_find_by_id = 0;
     const char* item_keyword = NULL;
@@ -222,7 +215,7 @@ static void console_find_item(todolist_t* tdl, int argc, char* argv[]) {
         if ((strcmp(argv[i], FIND_ITEM_BY_ID_FLAG_ABBR) == 0 ||
             strcmp(argv[i], FIND_ITEM_BY_ID_FLAG) == 0) &&
             !is_find_by_keyword) {
-                int* end_ptr = NULL;
+                char* end_ptr = NULL;
                 item_id = strtol(argv[i + 1], &end_ptr, 10);
                 
                 if (strlen(argv[i + 1]) != (end_ptr - argv[i + 1])) {
@@ -247,36 +240,63 @@ static void console_find_item(todolist_t* tdl, int argc, char* argv[]) {
         }
     }
 
+    int result = -1;
+
     if (is_find_by_id)
-        result = service_find_item_by_id(tdl, item_id, &itm);
+        result = service_find_item_by_id(tdl, item_id, &item);
     else if (is_find_by_keyword)
-        result = service_find_item_by_keyword(tdl, item_keyword, &itm);
+        result = service_find_item_by_keyword(tdl, item_keyword, &item);
     else
         assert(0);
 
     if (result == 0)
-        output_item(itm);
+        output_item(item);
     else
-        print_error("Service Find Failed")
+        print_error("Service Find Failed");
 }
 
 
 static void output_list(todolist_t* tdl, int line_max) {
-    const item_t* itm_list[];
+    const item_t** item_list;
     int line_size = 0;
 
-    service_get_list(tdl, line_max, &itm_list, &line_size);
+    service_get_list(tdl, line_max, &item_list, &line_size);
 
     for (int i = 0; i < line_size; i++) {
-        output_item(itm_list[i]);
+        if (i != 0) puts("---");
+        output_item(item_list[i]);
     }
 }
 
-static void output_item(item_t* itm) {
-    const char* state;
-    if (itm->state == FINISHED)
+static void output_item(const item_t* item) {
+    const char* state = NULL;
+    if (item->state == FINISHED)
         state = "Finished";
-    else if (itm->state == UNFINISHED)
+    else if (item->state == UNFINISHED)
         state = "Unfinished";
-    printf("[%s][%d]: %s\n---\n", state, itm->id, itm->content);
+    else
+        state = "Unknown";
+    fprintf(stdout, "[%s][%d] %s\n", state, item->id, item->content);
+}
+
+static void get_buffer_from_console(char** buffer, size_t* len) {
+    // When its size is not enough, it should realloc a double size memory to store the string.
+    assert(*len > 0);
+    size_t k = 0;
+    int c = EOF;
+    while ((c = getchar()) != EOF) {
+        (*buffer)[k++] = c;
+        if (k - 1 == *len) {
+            (*len) *= 2;
+            (*buffer) = (char*)realloc(*buffer, (*len) * sizeof(char));
+        }
+    }
+    (*buffer)[k] = '\0';
+}
+
+static void print_error(const char* err) {
+    fprintf(stderr, "[Error] %s\n", err);
+}
+static void print_info(const char* info) {
+    fprintf(stdout, "[Info] %s\n", info);
 }
