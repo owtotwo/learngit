@@ -35,4 +35,4 @@ $(OBJ_DIR)/TodolistModel.o: $(SRC_DIR)/TodolistModel.c  $(INC_DIR)/TodolistModel
 	$(CC) $(CC_FLAG) -c $< -o $@
 
 clean:
-	rm -rf $(OBJ_DIR)/*.o
+	rm -rf $(OBJ_DIR)/*.o main
