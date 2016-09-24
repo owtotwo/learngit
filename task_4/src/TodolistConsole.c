@@ -283,9 +283,9 @@ static void output_list(todolist_t* tdl, int line_max) {
 static void output_item(const item_t* item) {
     const char* state_str = NULL;
     if (item->state == FINISHED)
-        state_str = "Finished";
+        state_str = "Done";
     else if (item->state == UNFINISHED)
-        state_str = "Unfinished";
+        state_str = "TODO";
     else
         state_str = "Unknown";
     fprintf(stdout, "[%s][%d] %s\n", state_str, item->id, item->content);

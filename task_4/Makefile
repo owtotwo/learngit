@@ -22,6 +22,9 @@ $(OBJ_DIR)/TodolistService.o: $(SRC_DIR)/TodolistService.c  $(INC_DIR)/TodolistS
 		$(INC_DIR)/TodolistModel.h  $(INC_DIR)/TodolistStorage.h  $(INC_DIR)/TodolistErrorCode.h
 	$(CC) $(CC_FLAG) -c $< -o $@
 
+$(OBJ_DIR)/TodolistModel.o: $(SRC_DIR)/TodolistModel.c  $(INC_DIR)/TodolistModel.h  \
+		$(INC_DIR)/TodolistStorage.h  $(INC_DIR)/TodolistErrorCode.h
+	$(CC) $(CC_FLAG) -c $< -o $@
 
 clean:
 	rm -rf $(OBJ_DIR)/*.o
