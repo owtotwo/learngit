@@ -6,6 +6,14 @@ OBJ_DIR = $(ROOT_DIR)/build
 CC = gcc
 CC_FLAG = -std=c99 -Wall -Werror -g -I$(INC_DIR)
 
+main: $(OBJ_DIR)/TodolistConsole.o  $(OBJ_DIR)/TodolistService.o  \
+		$(OBJ_DIR)/TodolistModel.o  $(OBJ_DIR)/main.o
+	$(CC) $(CC_FLAG) $^ -o $@
+
+$(OBJ_DIR)/main.o: $(SRC_DIR)/main.c  $(INC_DIR)/TodolistConsole.h
+	$(CC) $(CC_FLAG) -c $< -o $@
+
+
 # FrontEnd
 $(OBJ_DIR)/frontend.o: $(OBJ_DIR)/TodolistConsole.o
 	cp $< $@

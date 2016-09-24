@@ -15,10 +15,11 @@ typedef struct {
     time_t date;
 } item_t;
 
-typedef struct {
-    item_node_t* next;
+struct item_node {
+    struct item_node* next;
     item_t* data;
-} item_node_t;
+};
+typedef struct item_node item_node_t;
 
 typedef struct {
     int id_count;

@@ -2,6 +2,7 @@
 #include "TodolistErrorCode.h"
 #include <stdlib.h> // for malloc, free
 #include <string.h> // for strlen
+#include <stdarg.h> // for va_start, va_end, va_arg, va_list
 
 /* both of them should be call in the same scope */
 static void create_item(item_t** item, int item_id, const char* content);
@@ -18,7 +19,7 @@ static void create_item(item_t** item, int item_id, const char* content) {
     p->id = item_id;
     p->content = (char*)malloc(strlen(content) * sizeof(char) + 1);
     p->state = UNFINISHED;
-    P->date = time(NULL);
+    p->date = time(NULL);
     if (p->content)
         strcpy(p->content, content);
 
@@ -66,7 +67,7 @@ void create_todolist(todolist_t** tdl) {
 void destroy_todolist(todolist_t** tdl) {
     if (!tdl) return;
 
-    destroy_item_list((*tdl)->item_list);
+    destroy_item_list(&((*tdl)->item_list));
     free(*tdl);
 
     *tdl = NULL;
@@ -89,10 +90,11 @@ error_t todolist_add_item(todolist_t* tdl, const char* content) {
 error_t todolist_finish_item(todolist_t* tdl, int item_id) {
     item_node_t* p = tdl->item_list;
     while (p) {
-        if (filter(p->data, item_id)) {
+        if (p->data->id == item_id) {
             p->data->state = FINISHED;
             return SUCCESS;
         }
+        p = p->next;
     }
     return FAILURE;
 }
@@ -110,6 +112,7 @@ error_t todolist_find_item(todolist_t* tdl, const item_t** item,
             *item = p->data;
             return SUCCESS;
         }
+        p = p->next;
     }
     return FAILURE;
 }

@@ -4,12 +4,13 @@
 #include <stdlib.h> // for strtol, malloc, free
 #include <errno.h> // for errno
 #include "TodolistConsole.h"
+#include "TodolistConsoleConstVal.h"
 #include "TodolistService.h"
 #include "TodolistModel.h"
 #include "TodolistErrorCode.h"
 
 /* it will free the memory */
-extern void safe_abort(const char* file, int line, const char* err);
+static void safe_abort(const char* file, int line, const char* err);
 
 static cmd_t get_command(const char* cmd);
 
@@ -179,10 +180,8 @@ static void console_add_item(todolist_t* tdl, int argc, char* argv[]) {
         result = service_add_item(tdl, content);
     }
 
-#if 0
     if (result == FATAL_ERROR)
         safe_abort(__FILE__, __LINE__, "Service Adding Error");
-#endif // TODO
 
     if (result == SUCCESS) {
         print_info("Adding...Done!");
@@ -270,12 +269,17 @@ static void output_list(todolist_t* tdl, int line_max) {
         (const item_t**)malloc((line_max + 1) * sizeof(const item_t*));
     size_t line_size = 0;
 
-    service_get_list(tdl, line_max, &item_list, &line_size);
+    error_t result = service_get_list(tdl, line_max, &item_list, &line_size);
 
-    for (size_t i = 0; i < line_size; i++) {
-        if (i != 0) puts("---");
-        output_item(item_list[i]);
+    if (result == SUCCESS) {
+        for (size_t i = 0; i < line_size; i++) {
+            if (i != 0) puts("---");
+            output_item(item_list[i]);
+        }
+    } else {
+        fprintf(stderr, "Service cannot get list\n");
     }
+    
 
     free(item_list);
 }
