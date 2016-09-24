@@ -1,12 +1,15 @@
 #include <assert.h> // for assert
 #include <stdio.h> // for printf, getchar
-#include <string.h> // for strcmp, strlen
+#include <string.h> // for strcmp, strlen, strerror
 #include <stdlib.h> // for strtol, malloc, free
+#include <errno.h> // for errno
 #include "TodolistConsole.h"
 #include "TodolistService.h"
 #include "TodolistModel.h"
+#include "TodolistErrorCode.h"
 
-
+/* it will free the memory */
+static void safe_abort(const char* file, int line, const char* err);
 static cmd_t get_command(const char* cmd);
 
 static void print_error(const char* err);
@@ -175,7 +178,10 @@ static void console_add_item(todolist_t* tdl, int argc, char* argv[]) {
         result = service_add_item(tdl, content);
     }
 
-    if (result == 0) {
+    if (result == FATAL_ERROR)
+        safe_abort(__FILE__, __LINE__, "Service Adding Error");
+
+    if (result == SUCCESS) {
         print_info("Adding...Done!");
     } else {
         print_error("Adding...Failed!");
@@ -194,7 +200,7 @@ static void console_finish_item(todolist_t* tdl, int argc, char* argv[]) {
         print_error("Expect a valid number of ID.");
     }
 
-    if (service_finish_item(tdl, item_id) == 0) {
+    if (service_finish_item(tdl, item_id) == SUCCESS) {
         print_info("ID %d Item...Finished!");
     } else {
         print_error("Finish...Failed!");
@@ -249,7 +255,7 @@ static void console_find_item(todolist_t* tdl, int argc, char* argv[]) {
     else
         assert(0);
 
-    if (result == 0)
+    if (result == SUCCESS)
         output_item(item);
     else
         print_error("Service Find Failed");
@@ -257,30 +263,34 @@ static void console_find_item(todolist_t* tdl, int argc, char* argv[]) {
 
 
 static void output_list(todolist_t* tdl, int line_max) {
-    const item_t** item_list;
-    int line_size = 0;
+    const item_t** item_list = 
+        (const item_t**)malloc((line_max + 1) * sizeof(const item_t*));
+    size_t line_size = 0;
 
     service_get_list(tdl, line_max, &item_list, &line_size);
 
-    for (int i = 0; i < line_size; i++) {
+    for (size_t i = 0; i < line_size; i++) {
         if (i != 0) puts("---");
         output_item(item_list[i]);
     }
+    
+    free(item_list);
 }
 
 static void output_item(const item_t* item) {
-    const char* state = NULL;
+    const char* state_str = NULL;
     if (item->state == FINISHED)
-        state = "Finished";
+        state_str = "Finished";
     else if (item->state == UNFINISHED)
-        state = "Unfinished";
+        state_str = "Unfinished";
     else
-        state = "Unknown";
-    fprintf(stdout, "[%s][%d] %s\n", state, item->id, item->content);
+        state_str = "Unknown";
+    fprintf(stdout, "[%s][%d] %s\n", state_str, item->id, item->content);
 }
 
 static void get_buffer_from_console(char** buffer, size_t* len) {
-    // When its size is not enough, it should realloc a double size memory to store the string.
+    // When its size is not enough, it should realloc a double size memory
+    // to store the string.
     assert(*len > 0);
     size_t k = 0;
     int c = EOF;
@@ -299,4 +309,9 @@ static void print_error(const char* err) {
 }
 static void print_info(const char* info) {
     fprintf(stdout, "[Info] %s\n", info);
+}
+
+static void safe_abort(const char* file, int line, const char* err) {
+    fprintf(stderr, "[Fatal]%s:%d: %s (%d:%s)\n",
+            file, line, err, errno, strerror(errno));
 }

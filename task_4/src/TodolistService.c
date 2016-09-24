@@ -1,0 +1,126 @@
+#include <stdarg.h> // for va_list, va_arg, va_start, va_end
+#include <string.h> // for strlen strstr
+#include <stdio.h> // for printf
+#include "TodolistService.h"
+#include "TodolistModel.h"
+#include "TodolistStorage.h"
+#include "TodolistErrorCode.h"
+
+static int filter_by_id(const item_t* item, ...);
+static int filter_by_keyword(const item_t* item, ...);
+static int filter_nothing(const item_t* item, ...);
+
+error_t service_add_item(todolist_t* tdl, const char* content) {
+    if (!tdl) return FATAL_ERROR;
+    
+    /* check some invalid word */
+    if (strlen(content) > 1024)
+        return FAILURE; // content should be less than 1024 bytes;
+
+    /*  ......  */
+
+    // ensure the content is valid
+
+    return todolist_add_item(tdl, content);
+}
+
+error_t service_finish_item(todolist_t* tdl, int item_id) {
+    if (!tdl) return FATAL_ERROR;
+
+    /* id should be greater than zero */
+    if (item_id <= 0) return FAILURE;
+
+    // item_t* item = NULL;
+
+    return todolist_finish_item(tdl, item_id);
+}
+
+// line_size is return 
+error_t service_get_list(todolist_t* tdl, int line_max, const item_t*** item_list,
+                     size_t* return_size) {
+    if (!tdl || !item_list) return FATAL_ERROR;
+
+    /* line_max should be not less than zero */
+    if (line_max < 0) return FAILURE;
+    
+    for (int i = 0; i < line_max; i++) {
+        const item_t* item = NULL;
+        error_t result = todolist_find_item(tdl, &item, filter_nothing);
+        if (result) {
+            (*item_list)[i] = item;
+        } else {
+            (*item_list)[i] = NULL;
+            (*return_size) = i;
+            return result;
+        }
+    }
+
+    (*item_list)[line_max] = NULL;
+
+    return SUCCESS;
+}
+
+error_t service_find_item_by_id(todolist_t* tdl, int item_id, const item_t** item) {
+    return todolist_find_item(tdl, item, filter_by_id, item_id);
+}
+
+error_t service_find_item_by_keyword(todolist_t* tdl, const char* item_keyword,
+                                 const item_t** item) {
+    return todolist_find_item(tdl, item, filter_by_keyword, item_keyword);
+}
+
+// consume arg1=id
+static int filter_by_id(const item_t* item, ...) {
+    int result = 0;
+    va_list ap;
+    va_start(ap, item);
+
+    int item_id = va_arg(ap, int);
+    int result = (item_id == item->id ? 1 : 0);
+
+    va_end(ap);
+    return result;
+}
+
+static int filter_by_keyword(const item_t* item, ...) {
+    int result = 0;
+    va_list ap;
+    va_start(ap, item);
+
+    const char* item_keyword = va_arg(ap, const char*);
+    int result = (strstr(item->content, item_keyword) != NULL ? 1 : 0);
+
+    va_end(ap);
+    return result;
+}
+
+static int filter_nothing(const item_t* item, ...) {
+    return 1;
+}
+
+/*
+static int max(int argc, ...) {
+    va_list al;
+    va_start(al, argc);
+    int max_val = va_arg(al, int);
+    for (int i = 1; i < argc; i++) {
+        int tmp = va_arg(al, int);
+        if (max_val < tmp) max_val = tmp;
+    }
+    va_end(al);
+    return max_val;
+}
+
+static int func(int(*fp)(int, ...), int size, ...) {
+    va_list ap1;
+    va_start(ap1, size);
+    int max_val = fp(va_arg(ap1, int), va_arg(ap1, int), va_arg(ap1, int), va_arg(ap1, int));
+    va_end(ap1);
+    return max_val;
+}
+
+int main() {
+    printf("The max value is %d\n", func(max, 4, 4, 0, 9, -2));
+    return 0;
+}
+*/

@@ -15,13 +15,13 @@ typedef struct {
 } item_t;
 
 typedef struct {
-   item_t** items;
+    item_t** items;
 } todolist_t;
 
-
+/* both of them should be call in the same scope */
 void create_item(item_t** item);
 void destroy_item(item_t** item);
-
+/* both of them should be call in the same scope */
 void create_todolist(todolist_t** tdl);
 void destroy_todolist(todolist_t** tdl);
 
