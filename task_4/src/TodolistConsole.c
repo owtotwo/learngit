@@ -9,7 +9,8 @@
 #include "TodolistErrorCode.h"
 
 /* it will free the memory */
-static void safe_abort(const char* file, int line, const char* err);
+extern void safe_abort(const char* file, int line, const char* err);
+
 static cmd_t get_command(const char* cmd);
 
 static void print_error(const char* err);
@@ -178,8 +179,10 @@ static void console_add_item(todolist_t* tdl, int argc, char* argv[]) {
         result = service_add_item(tdl, content);
     }
 
+#if 0
     if (result == FATAL_ERROR)
         safe_abort(__FILE__, __LINE__, "Service Adding Error");
+#endif // TODO
 
     if (result == SUCCESS) {
         print_info("Adding...Done!");
@@ -273,7 +276,7 @@ static void output_list(todolist_t* tdl, int line_max) {
         if (i != 0) puts("---");
         output_item(item_list[i]);
     }
-    
+
     free(item_list);
 }
 
