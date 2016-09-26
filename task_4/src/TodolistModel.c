@@ -1,17 +1,14 @@
-#include "TodolistModel.h"
-#include "TodolistErrorCode.h"
 #include <stdlib.h> // for malloc, free
 #include <string.h> // for strlen
 #include <stdarg.h> // for va_start, va_end, va_arg, va_list
-
-/* both of them should be call in the same scope */
-static void create_item(item_t** item, int item_id, const char* content);
-static void destroy_item(item_t** item);
-static void create_item_list(item_node_t** item_list);
-static void destroy_item_list(item_node_t** item_list);
+#include <time.h> // for time
+#include "TodolistModel.h"
+#include "TodolistErrorCode.h"
+#include "TodolistStorage.h"
 
 
-static void create_item(item_t** item, int item_id, const char* content) {
+void create_item(item_t** item, const char* content, int item_id,
+                 item_state_t state, time_t timestamp) {
     if (!item) return; // neew Not NULL
     if (*item) return; // need NULL 
 
@@ -19,14 +16,14 @@ static void create_item(item_t** item, int item_id, const char* content) {
     p->id = item_id;
     p->content = (char*)malloc(strlen(content) * sizeof(char) + 1);
     p->state = UNFINISHED;
-    p->date = time(NULL);
+    p->timestamp = timestamp;
     if (p->content)
         strcpy(p->content, content);
 
     (*item) = p;
 }
 
-static void destroy_item(item_t** item) {
+void destroy_item(item_t** item) {
     if (!item) return;
 
     free((*item)->content);
@@ -35,11 +32,11 @@ static void destroy_item(item_t** item) {
     *item = NULL;
 }
 
-static void create_item_list(item_node_t** item_list) {
+void create_item_list(item_node_t** item_list) {
     *item_list = NULL;
 }
 
-static void destroy_item_list(item_node_t** item_list) {
+void destroy_item_list(item_node_t** item_list) {
     if (!item_list) return;
 
     item_node_t* p = (*item_list);
@@ -60,6 +57,9 @@ void create_todolist(todolist_t** tdl) {
     todolist_t* p = (todolist_t*)malloc(1 * sizeof(todolist_t));
     p->id_count = 0;
     create_item_list(&(p->item_list));
+    p->file_address = DEFAULT_ADDRESS;
+
+    todolist_load(p);
 
     *tdl = p;
 }
@@ -67,15 +67,18 @@ void create_todolist(todolist_t** tdl) {
 void destroy_todolist(todolist_t** tdl) {
     if (!tdl) return;
 
+    todolist_save(*tdl);
+
     destroy_item_list(&((*tdl)->item_list));
     free(*tdl);
 
     *tdl = NULL;
 }
 
-error_t todolist_add_item(todolist_t* tdl, const char* content) {
+error_t todolist_add_item(todolist_t* tdl, const char* content, int item_id,
+                          item_state_t state, time_t timestamp) {
     item_t* p = NULL;
-    create_item(&p, ++tdl->id_count, content);
+    create_item(&p, content, item_id, state, timestamp);
 
     if (!p) return FAILURE;
 
@@ -87,7 +90,7 @@ error_t todolist_add_item(todolist_t* tdl, const char* content) {
     return SUCCESS;
 }
 
-error_t todolist_finish_item(todolist_t* tdl, int item_id) {
+error_t todolist_finish_item(todolist_t* tdl, int item_id, time_t timestamp) {
     item_node_t* p = tdl->item_list;
     while (p) {
         if (p->data->id == item_id) {

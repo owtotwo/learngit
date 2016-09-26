@@ -1,6 +1,7 @@
 #include <stdarg.h> // for va_list, va_arg, va_start, va_end
 #include <string.h> // for strlen strstr
 #include <stdio.h> // for printf
+#include <time.h> // for time
 #include "TodolistService.h"
 #include "TodolistModel.h"
 #include "TodolistErrorCode.h"
@@ -20,7 +21,8 @@ error_t service_add_item(todolist_t* tdl, const char* content) {
 
     // ensure the content is valid
 
-    return todolist_add_item(tdl, content);
+    return todolist_add_item(tdl, content, ++(tdl->id_count),
+                             UNFINISHED, time(NULL));
 }
 
 error_t service_finish_item(todolist_t* tdl, int item_id) {
@@ -31,7 +33,7 @@ error_t service_finish_item(todolist_t* tdl, int item_id) {
 
     // item_t* item = NULL;
 
-    return todolist_finish_item(tdl, item_id);
+    return todolist_finish_item(tdl, item_id, time(NULL));
 }
 
 // line_size is return 
