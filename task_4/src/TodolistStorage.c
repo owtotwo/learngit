@@ -8,7 +8,7 @@
 
 error_t todolist_save(todolist_t* tdl) {
     assert(tdl);
-    FILE* fout = fopen(tdl->file_address, "wt");
+    FILE* fout = fopen("data", "wt");
     if (!fout) {
         perror("Saving...");
         return FAILURE;
@@ -27,6 +27,7 @@ error_t todolist_save(todolist_t* tdl) {
         cJSON_AddNumberToObject(item, "id", p->data->id);
         cJSON_AddNumberToObject(item, "state", p->data->state);
         cJSON_AddNumberToObject(item, "timestamp", p->data->timestamp);
+        printf("saving content is %s \n.", p->data->content);
         cJSON_AddStringToObject(item, "content", p->data->content);
         p = p->next;
     }
@@ -44,7 +45,7 @@ error_t todolist_save(todolist_t* tdl) {
 
 error_t todolist_load(todolist_t* tdl) {
     assert(tdl);
-    FILE* fin = fopen(tdl->file_address, "rt");
+    FILE* fin = fopen("data", "rt");
     if (!fin) {
         perror("Loading");
         return FAILURE;

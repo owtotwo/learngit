@@ -269,24 +269,24 @@ static void console_find_item(todolist_t* tdl, int argc, char* argv[]) {
 
 
 static void output_list(todolist_t* tdl, int line_max, int done_needed) {
-    const item_t** item_list = 
-        (const item_t**)malloc((line_max + 1) * sizeof(const item_t*));
+    item_node_t* item_list = NULL;
+    create_item_list(&item_list);
 
-    assert(item_list);
-
-    error_t result = service_get_list(tdl, line_max, 1, item_list);
+    error_t result = service_get_n_items_by_state(tdl, &item_list, line_max, done_needed);
 
     if (result == SUCCESS) {
-        int k = 0;
-        while (item_list[k])
-            output_item(item_list[k++]);
-        if (k == 0)
-            print_info("No Record.");
+        const item_node_t* p = item_list;
+        print_info("==========================================");
+        while (p) {
+            output_item(p->data);
+            p = p->next;
+        }
+        print_info("==========================================");
     } else {
         fprintf(stderr, "Service cannot get list\n");
     }
-    
-    free(item_list);
+
+    destroy_item_list(&item_list); 
 }
 
 static void output_item(const item_t* item) {

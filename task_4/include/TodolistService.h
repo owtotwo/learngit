@@ -15,11 +15,11 @@
 // Return 0 if Success
 error_t service_add_item(todolist_t* tdl, const char* content);
 error_t service_finish_item(todolist_t* tdl, int item_id);
-error_t service_get_list(todolist_t* tdl, int line_max, int done_needed,
-                         const item_t** item_list);
+
 error_t service_find_item_by_id(todolist_t* tdl, int item_id,
                                 const item_t** item);
 error_t service_find_item_by_keyword(todolist_t* tdl, const char* item_keyword,
                                  const item_t** item);
-
+error_t service_get_n_items_by_state(todolist_t* tdl, item_node_t** item_list,
+                                     int line_max, int done_needed);
 #endif // TODOLIST_TODOLISTSERVICE_H__

@@ -38,6 +38,7 @@ void create_item(item_t** item, const char* content, int item_id,
 void destroy_item(item_t** item);
 void create_item_list(item_node_t** item_list);
 void destroy_item_list(item_node_t** item_list);
+void item_list_add(item_node_t** item_list, item_t* item);
 void create_todolist(todolist_t** tdl);
 void destroy_todolist(todolist_t** tdl);
 
@@ -48,8 +49,9 @@ error_t todolist_finish_item(todolist_t* tdl, int item_id, time_t timestamp);
 error_t todolist_find_item(todolist_t* tdl, const item_t** item,
                            int(*filter)(const item_t*, va_list), ...);
 error_t todolist_query_item(todolist_t* tdl,
-                            const item_t** item_list,
-                            int line_max,
-                            int(*filter)(const item_t*, va_list), ...);
+                            item_node_t** item_list,
+                            int item_max,
+                            int(*filter)(const item_t*, va_list),
+                            ...);
 
 #endif // TODOLIST_TODOLISTMODEL_H__

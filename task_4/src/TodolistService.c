@@ -18,10 +18,6 @@ error_t service_add_item(todolist_t* tdl, const char* content) {
     if (strlen(content) > 1024)
         return FAILURE; // content should be less than 1024 bytes;
 
-    /*  ......  */
-
-    // ensure the content is valid
-
     return todolist_add_item(tdl, content, ++(tdl->id_count),
                              UNFINISHED, time(NULL));
 }
@@ -35,22 +31,6 @@ error_t service_finish_item(todolist_t* tdl, int item_id) {
     return todolist_finish_item(tdl, item_id, time(NULL));
 }
 
-// line_size is return 
-error_t service_get_list(todolist_t* tdl, int line_max, int done_needed,
-                         const item_t** item_list) {
-    if (!tdl || !item_list) return FATAL_ERROR;
-
-    /* line_max should be not less than zero */
-    if (line_max < 0) return FAILURE;
-
-
-    error_t result = done_needed ?
-        todolist_query_item(tdl, item_list,
-                            line_max, filter_by_state, UNFINISHED) :
-        todolist_query_item(tdl, item_list, line_max, filter_by_nothing); 
-
-    return result;
-}
 
 error_t service_find_item_by_id(todolist_t* tdl, int item_id, const item_t** item) {
     return todolist_find_item(tdl, item, filter_by_id, item_id);
@@ -59,6 +39,21 @@ error_t service_find_item_by_id(todolist_t* tdl, int item_id, const item_t** ite
 error_t service_find_item_by_keyword(todolist_t* tdl, const char* item_keyword,
                                  const item_t** item) {
     return todolist_find_item(tdl, item, filter_by_keyword, item_keyword);
+}
+
+error_t service_get_n_items_by_state(todolist_t* tdl, item_node_t** item_list,
+                                     int line_max, int done_needed) {
+    int items_count = line_max;
+    error_t result = FAILURE;
+
+    if (done_needed)
+        result = todolist_query_item(tdl, item_list, items_count, 
+                                     filter_by_state, UNFINISHED);
+    else
+        result = todolist_query_item(tdl, item_list, items_count,
+                                     filter_by_nothing);
+
+    return result;
 }
 
 // consume arg1=id

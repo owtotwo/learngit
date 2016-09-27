@@ -51,6 +51,16 @@ void destroy_item_list(item_node_t** item_list) {
     (*item_list) = NULL;
 }
 
+void item_list_add(item_node_t** item_list, item_t* item) {
+    
+    item_node_t* new_node = (item_node_t*)malloc(1 * sizeof(item_node_t));
+
+    new_node->next = *item_list;
+    new_node->data = item;
+
+    *item_list = new_node;
+}
+
 void create_todolist(todolist_t** tdl) {
     if (!tdl) return;
     if (*tdl) return;
@@ -76,16 +86,11 @@ void destroy_todolist(todolist_t** tdl) {
 
 error_t todolist_add_item(todolist_t* tdl, const char* content, int item_id,
                           item_state_t state, time_t timestamp) {
-    item_t* p = NULL;
-    create_item(&p, content, item_id, state, timestamp);
+    item_t* item = NULL;
+    create_item(&item, content, item_id, state, timestamp);
+    if (!item) return FAILURE;
 
-    if (!p) return FAILURE;
-
-    item_node_t* new_node = (item_node_t*)malloc(1 * sizeof(item_node_t));
-    new_node->next = tdl->item_list;
-    new_node->data = p;
-    tdl->item_list = new_node;
-
+    item_list_add(&(tdl->item_list), item);
     return SUCCESS;
 }
 
@@ -120,21 +125,20 @@ error_t todolist_find_item(todolist_t* tdl, const item_t** item,
 }
 
 error_t todolist_query_item(todolist_t* tdl,
-                            const item_t** item_list,
-                            int line_max,
-                            int(*filter)(const item_t*, va_list), ...) {
+                            item_node_t** item_list,
+                            int item_max,
+                            int(*filter)(const item_t*, va_list),
+                            ...) {
     va_list ap;
     va_start(ap, filter);
     
-    int k = 0;
-    item_node_t* p = tdl->item_list;
-    for (unsigned i = 0; p && i < (unsigned)line_max; i++) {
+    const item_node_t* p = tdl->item_list;
+    for (int i = 0; p && i < item_max; i++) {
         if (filter(p->data, ap)) {
-            item_list[k++] = p->data;
+            item_list_add(item_list, p->data);
         }
         p = p->next;
     }
-    item_list[k] = NULL;
 
     va_end(ap);
 
