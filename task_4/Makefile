@@ -33,7 +33,7 @@ $(OBJ_DIR)/TodolistStorage.o: $(SRC_DIR)/TodolistStorage.c  $(INC_DIR)/TodolistS
 	$(CC) $(CC_FLAG) -c $< -o $@
 
 $(OBJ_DIR)/cJSON.o:
-	cd $(LIB_DIR) && make
+	cd $(LIB_DIR) && make CC=$(CC)
 
 $(INC_DIR)/*.h:
 	touch *.h
