@@ -7,6 +7,7 @@
 #include "TodolistConsoleConstVal.h"
 #include "TodolistService.h"
 #include "TodolistModel.h"
+#include "TodolistStorage.h"
 #include "TodolistErrorCode.h"
 
 /* it will free the memory */
@@ -26,7 +27,7 @@ static void console_finish_item(todolist_t* tdl, int argc, char* argv[]);
 static void console_find_item(todolist_t* tdl, int argc, char* argv[]);
 
 static void get_buffer_from_console(char** buffer, size_t* len);
-static void output_list(todolist_t* tdl, int line_max);
+static void output_list(todolist_t* tdl, int line_max, int done_needed);
 static void output_item(const item_t* item);
 
 
@@ -35,6 +36,8 @@ int todolist_console(int argc, char* argv[]) {
     todolist_t* tdl = NULL;
 
     create_todolist(&tdl);
+    if (todolist_load(tdl) == FAILURE)
+        print_info("File initialization...\n");
     int result = console_run_todolist(tdl, argc, argv);
     destroy_todolist(&tdl);
 
@@ -76,7 +79,7 @@ static int console_run_todolist(todolist_t* tdl, int argc, char* argv[]) {
             assert(0);
     }
 
-    return -1; // should not be here
+    return SUCCESS; // should not be here
 }
 
 
@@ -134,12 +137,12 @@ static void console_print_list(todolist_t* tdl, int argc, char* argv[]) {
         }
     }
 
-    output_list(tdl, line_max);
+    output_list(tdl, line_max, 1);
 }
 
 
 static void console_print_list_by_default(todolist_t* tdl) {
-    output_list(tdl, DEFAULT_PRINT_LINE_SIZE);
+    output_list(tdl, DEFAULT_PRINT_LINE_SIZE, 1);
 }
 
 
@@ -196,14 +199,14 @@ static void console_finish_item(todolist_t* tdl, int argc, char* argv[]) {
     assert(argc > 1);
 
     char* end_ptr = NULL;
-    int item_id = strtol(argv[3], &end_ptr, 10);
+    int item_id = strtol(argv[2], &end_ptr, 10);
     
-    if (strlen(argv[3]) != (end_ptr - argv[3])) {
+    if (strlen(argv[2]) != (end_ptr - argv[2])) {
         print_error("Expect a valid number of ID.");
     }
 
     if (service_finish_item(tdl, item_id) == SUCCESS) {
-        print_info("ID %d Item...Finished!");
+        print_info("Finished!");
     } else {
         print_error("Finish...Failed!");
     }
@@ -264,23 +267,24 @@ static void console_find_item(todolist_t* tdl, int argc, char* argv[]) {
 }
 
 
-static void output_list(todolist_t* tdl, int line_max) {
+static void output_list(todolist_t* tdl, int line_max, int done_needed) {
     const item_t** item_list = 
         (const item_t**)malloc((line_max + 1) * sizeof(const item_t*));
-    size_t line_size = 0;
 
-    error_t result = service_get_list(tdl, line_max, &item_list, &line_size);
+    assert(item_list);
+
+    error_t result = service_get_list(tdl, line_max, 1, item_list);
 
     if (result == SUCCESS) {
-        for (size_t i = 0; i < line_size; i++) {
-            if (i != 0) puts("---");
-            output_item(item_list[i]);
-        }
+        int k = 0;
+        while (item_list[k])
+            output_item(item_list[k++]);
+        if (k == 0)
+            print_info("No Record.");
     } else {
         fprintf(stderr, "Service cannot get list\n");
     }
     
-
     free(item_list);
 }
 
@@ -292,7 +296,7 @@ static void output_item(const item_t* item) {
         state_str = "TODO";
     else
         state_str = "Unknown";
-    fprintf(stdout, "[%s][%d] %s\n", state_str, item->id, item->content);
+    fprintf(stdout, "[\33[32m%s\33[0m][%d] %s\n", state_str, item->id, item->content);
 }
 
 static void get_buffer_from_console(char** buffer, size_t* len) {

@@ -6,9 +6,10 @@
 #include "TodolistModel.h"
 #include "TodolistErrorCode.h"
 
-static int filter_by_id(const item_t* item, ...);
-static int filter_by_keyword(const item_t* item, ...);
-static int filter_nothing(const item_t* item, ...);
+static int filter_by_id(const item_t* item, va_list ap);
+static int filter_by_keyword(const item_t* item, va_list ap);
+static int filter_by_nothing(const item_t* item, va_list ap);
+static int filter_by_state(const item_t* item, va_list ap);
 
 error_t service_add_item(todolist_t* tdl, const char* content) {
     if (!tdl) return FATAL_ERROR;
@@ -31,34 +32,24 @@ error_t service_finish_item(todolist_t* tdl, int item_id) {
     /* id should be greater than zero */
     if (item_id <= 0) return FAILURE;
 
-    // item_t* item = NULL;
-
     return todolist_finish_item(tdl, item_id, time(NULL));
 }
 
 // line_size is return 
-error_t service_get_list(todolist_t* tdl, int line_max, const item_t*** item_list,
-                     size_t* return_size) {
+error_t service_get_list(todolist_t* tdl, int line_max, int done_needed,
+                         const item_t** item_list) {
     if (!tdl || !item_list) return FATAL_ERROR;
 
     /* line_max should be not less than zero */
     if (line_max < 0) return FAILURE;
-    
-    for (int i = 0; i < line_max; i++) {
-        const item_t* item = NULL;
-        error_t result = todolist_find_item(tdl, &item, filter_nothing);
-        if (result) {
-            (*item_list)[i] = item;
-        } else {
-            (*item_list)[i] = NULL;
-            (*return_size) = i;
-            return result;
-        }
-    }
 
-    (*item_list)[line_max] = NULL;
 
-    return SUCCESS;
+    error_t result = done_needed ?
+        todolist_query_item(tdl, item_list,
+                            line_max, filter_by_state, UNFINISHED) :
+        todolist_query_item(tdl, item_list, line_max, filter_by_nothing); 
+
+    return result;
 }
 
 error_t service_find_item_by_id(todolist_t* tdl, int item_id, const item_t** item) {
@@ -71,28 +62,27 @@ error_t service_find_item_by_keyword(todolist_t* tdl, const char* item_keyword,
 }
 
 // consume arg1=id
-static int filter_by_id(const item_t* item, ...) {
-    va_list ap;
-    va_start(ap, item);
+static int filter_by_id(const item_t* item, va_list ap) {
 
     int item_id = va_arg(ap, int);
     int result = (item_id == item->id ? 1 : 0);
 
-    va_end(ap);
     return result;
 }
 
-static int filter_by_keyword(const item_t* item, ...) {
-    va_list ap;
-    va_start(ap, item);
+static int filter_by_keyword(const item_t* item, va_list ap) {
 
     const char* item_keyword = va_arg(ap, const char*);
     int result = (strstr(item->content, item_keyword) != NULL ? 1 : 0);
 
-    va_end(ap);
     return result;
 }
 
-static int filter_nothing(const item_t* item, ...) {
-    return 1;
+static int filter_by_nothing(const item_t* item, va_list ap) { return 1; }
+
+static int filter_by_state(const item_t* item, va_list ap) {
+    item_state_t state = va_arg(ap, item_state_t);
+    int result = (state == item->state ? 1 : 0);
+
+    return result;
 }

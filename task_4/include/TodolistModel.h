@@ -1,8 +1,11 @@
 #ifndef TODOLIST_TODOLISTMODEL_H__
 #define TODOLIST_TODOLISTMODEL_H__
 
+#include <stdarg.h> // for va_list
 #include <time.h> // for time
 #include "TodolistErrorCode.h"
+
+#define DEFAULT_ADDRESS ".todolist_data"
 
 typedef enum {
     UNKNOWN_ITEM_STATE, FINISHED, UNFINISHED
@@ -28,8 +31,6 @@ typedef struct {
     const char* file_address;
 } todolist_t;
 
-#define DEFAULT_ADDRESS "data"
-
 
 /* both of them should be call in the same scope */
 void create_item(item_t** item, const char* content, int item_id,
@@ -45,6 +46,10 @@ error_t todolist_add_item(todolist_t* tdl, const char* content, int item_id,
                           item_state_t state, time_t timestamp);
 error_t todolist_finish_item(todolist_t* tdl, int item_id, time_t timestamp);
 error_t todolist_find_item(todolist_t* tdl, const item_t** item,
-                           int(*filter)(const item_t*, ...), ...);
+                           int(*filter)(const item_t*, va_list), ...);
+error_t todolist_query_item(todolist_t* tdl,
+                            const item_t** item_list,
+                            int line_max,
+                            int(*filter)(const item_t*, va_list), ...);
 
 #endif // TODOLIST_TODOLISTMODEL_H__

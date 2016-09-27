@@ -6,6 +6,7 @@
 #include "TodolistErrorCode.h"
 #include "TodolistStorage.h"
 
+#include <stdio.h>
 
 void create_item(item_t** item, const char* content, int item_id,
                  item_state_t state, time_t timestamp) {
@@ -15,7 +16,7 @@ void create_item(item_t** item, const char* content, int item_id,
     item_t* p = (item_t*)malloc(1 * sizeof(item_t));
     p->id = item_id;
     p->content = (char*)malloc(strlen(content) * sizeof(char) + 1);
-    p->state = UNFINISHED;
+    p->state = state;
     p->timestamp = timestamp;
     if (p->content)
         strcpy(p->content, content);
@@ -59,8 +60,6 @@ void create_todolist(todolist_t** tdl) {
     create_item_list(&(p->item_list));
     p->file_address = DEFAULT_ADDRESS;
 
-    todolist_load(p);
-
     *tdl = p;
 }
 
@@ -95,6 +94,7 @@ error_t todolist_finish_item(todolist_t* tdl, int item_id, time_t timestamp) {
     while (p) {
         if (p->data->id == item_id) {
             p->data->state = FINISHED;
+            p->data->timestamp = timestamp;
             return SUCCESS;
         }
         p = p->next;
@@ -103,19 +103,40 @@ error_t todolist_finish_item(todolist_t* tdl, int item_id, time_t timestamp) {
 }
 
 error_t todolist_find_item(todolist_t* tdl, const item_t** item,
-                           int(*filter)(const item_t*, ...), ...) {
+                           int(*filter)(const item_t*, va_list), ...) {
     va_list ap;
     va_start(ap, filter);
-    int item_id = va_arg(ap, int); // get first argument item_id
-    va_end(ap);
 
     item_node_t* p = tdl->item_list;
     while (p) {
-        if (filter(p->data, item_id)) {
+        if (filter(p->data, ap)) {
             *item = p->data;
-            return SUCCESS;
+            break;
         }
         p = p->next;
     }
-    return FAILURE;
+    va_end(ap);
+    return p ? SUCCESS : FAILURE;
+}
+
+error_t todolist_query_item(todolist_t* tdl,
+                            const item_t** item_list,
+                            int line_max,
+                            int(*filter)(const item_t*, va_list), ...) {
+    va_list ap;
+    va_start(ap, filter);
+    
+    int k = 0;
+    item_node_t* p = tdl->item_list;
+    for (unsigned i = 0; p && i < (unsigned)line_max; i++) {
+        if (filter(p->data, ap)) {
+            item_list[k++] = p->data;
+        }
+        p = p->next;
+    }
+    item_list[k] = NULL;
+
+    va_end(ap);
+
+    return SUCCESS;
 }

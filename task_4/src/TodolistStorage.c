@@ -10,7 +10,7 @@ error_t todolist_save(todolist_t* tdl) {
     assert(tdl);
     FILE* fout = fopen(tdl->file_address, "wt");
     if (!fout) {
-        perror("Can't not open file.\n");
+        perror("Saving...");
         return FAILURE;
     }
     
@@ -46,7 +46,7 @@ error_t todolist_load(todolist_t* tdl) {
     assert(tdl);
     FILE* fin = fopen(tdl->file_address, "rt");
     if (!fin) {
-        perror("Can't not open file.\n");
+        perror("Loading");
         return FAILURE;
     }
 
@@ -67,6 +67,9 @@ error_t todolist_load(todolist_t* tdl) {
 
     
     cJSON* data = cJSON_GetObjectItem(json, "data");
+
+    assert(cJSON_HasObjectItem(json, "data"));
+    assert(data);
     
     for (int i = 0; i < cJSON_GetArraySize(data); i++) {
         cJSON* item = cJSON_GetArrayItem(data, i);
