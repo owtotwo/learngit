@@ -28,7 +28,7 @@ except IOError as err:
 
 
 # cut the content by regex and count the words
-words = re.findall(r"[a-zA-Z]+['_/]?[a-zA-Z]+", content)
+words = re.findall(r"[a-zA-Z]+['_\-/]?[a-zA-Z]+", content)
 map(lambda x: x if (x.islower() or x.lower() not in words)
     else x.lower(), words)
 words_count = Counter(words).items()
