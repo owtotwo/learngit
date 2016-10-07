@@ -28,7 +28,8 @@ static void console_finish_item(todolist_t* tdl, int argc, char* argv[]);
 static void console_find_item(todolist_t* tdl, int argc, char* argv[]);
 
 static void get_buffer_from_console(char** buffer, size_t* len);
-static void output_list(todolist_t* tdl, int line_max, int done_needed);
+static void console_output_list(todolist_t* tdl, int line_max, int done_needed);
+static void output_list(const item_node_t** item_list);
 static void output_item(const item_t* item);
 
 
@@ -38,8 +39,11 @@ int todolist_console(int argc, char* argv[]) {
 
     create_todolist(&tdl);
     if (todolist_load(tdl) == FAILURE)
-        print_info("File initialization...\n");
+        print_info("File initialization...");
+
     int result = console_run_todolist(tdl, argc, argv);
+
+    todolist_save(tdl);
     destroy_todolist(&tdl);
 
     return result;
@@ -138,12 +142,12 @@ static void console_print_list(todolist_t* tdl, int argc, char* argv[]) {
         }
     }
 
-    output_list(tdl, line_max, 1);
+    console_output_list(tdl, line_max, 1);
 }
 
 
 static void console_print_list_by_default(todolist_t* tdl) {
-    output_list(tdl, DEFAULT_PRINT_LINE_SIZE, 1);
+    console_output_list(tdl, DEFAULT_PRINT_LINE_SIZE, 1);
 }
 
 
@@ -217,9 +221,11 @@ static void console_finish_item(todolist_t* tdl, int argc, char* argv[]) {
 static void console_find_item(todolist_t* tdl, int argc, char* argv[]) {
     assert(argc > 1);
 
-    const item_t* item;
+    item_node_t** item_list = NULL;
+
     int item_id = -1;
     int is_find_by_id = 0;
+
     const char* item_keyword = NULL;
     int is_find_by_keyword = 0;
 
@@ -255,38 +261,39 @@ static void console_find_item(todolist_t* tdl, int argc, char* argv[]) {
     int result = -1;
 
     if (is_find_by_id)
-        result = service_find_item_by_id(tdl, item_id, &item);
+        result = service_find_item_by_id(tdl, item_id, item_list);
     else if (is_find_by_keyword)
-        result = service_find_item_by_keyword(tdl, item_keyword, &item);
+        result = service_find_item_by_keyword(tdl, item_keyword, item_list);
     else
         assert(0);
 
     if (result == SUCCESS)
-        output_item(item);
+        output_list(item_list);
     else
         print_error("Service Find Failed");
 }
 
 
-static void output_list(todolist_t* tdl, int line_max, int done_needed) {
-    item_node_t* item_list = NULL;
-    create_item_list(&item_list);
+static void console_output_list(todolist_t* tdl, int line_max, int done_needed) {
+    item_node_t** item_list = NULL; // for traversal
 
-    error_t result = service_get_n_items_by_state(tdl, &item_list, line_max, done_needed);
+    error_t result = service_get_n_items_by_state(tdl, item_list, line_max, done_needed);
 
     if (result == SUCCESS) {
-        const item_node_t* p = item_list;
-        print_info("==========================================");
-        while (p) {
-            output_item(p->data);
-            p = p->next;
-        }
-        print_info("==========================================");
+        output_list(item_list);
     } else {
         fprintf(stderr, "Service cannot get list\n");
     }
+}
 
-    destroy_item_list(&item_list); 
+static void output_list(const item_node_t** item_list) {
+    const item_node_t* p = item_list;
+    print_info("==========================================");
+    while (p) {
+        output_item(p->data);
+        p = p->next;
+    }
+    print_info("==========================================");
 }
 
 static void output_item(const item_t* item) {

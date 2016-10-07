@@ -6,7 +6,6 @@
 #include "TodolistErrorCode.h"
 #include "TodolistStorage.h"
 
-#include <stdio.h>
 
 void create_item(item_t** item, const char* content, int item_id,
                  item_state_t state, time_t timestamp) {
@@ -28,8 +27,9 @@ void destroy_item(item_t** item) {
     if (!item) return;
 
     free((*item)->content);
-    free(*item);
+    (*item)->content = NULL;
 
+    free(*item);
     *item = NULL;
 }
 
@@ -46,6 +46,7 @@ void destroy_item_list(item_node_t** item_list) {
         item_node_t* tmp = p;
         p = p->next;
         free(tmp);
+        tmp = NULL;
     }
 
     (*item_list) = NULL;
@@ -76,11 +77,9 @@ void create_todolist(todolist_t** tdl) {
 void destroy_todolist(todolist_t** tdl) {
     if (!tdl) return;
 
-    todolist_save(*tdl);
-
     destroy_item_list(&((*tdl)->item_list));
-    free(*tdl);
 
+    free(*tdl);
     *tdl = NULL;
 }
 
@@ -144,3 +143,4 @@ error_t todolist_query_item(todolist_t* tdl,
 
     return SUCCESS;
 }
+

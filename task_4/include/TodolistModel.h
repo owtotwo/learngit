@@ -5,7 +5,6 @@
 #include <time.h> // for time
 #include "TodolistErrorCode.h"
 
-#define DEFAULT_ADDRESS ".todolist_data"
 
 typedef enum {
     UNKNOWN_ITEM_STATE, FINISHED, UNFINISHED

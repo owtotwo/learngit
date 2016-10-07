@@ -6,9 +6,10 @@
 #include "TodolistModel.h" // for todolist_t, item_node_t
 #include "cJSON.h"
 
+
 error_t todolist_save(todolist_t* tdl) {
     assert(tdl);
-    FILE* fout = fopen("data", "wt");
+    FILE* fout = fopen(DEFAULT_ADDRESS, "wt");
     if (!fout) {
         perror("Saving...");
         return FAILURE;
@@ -18,8 +19,8 @@ error_t todolist_save(todolist_t* tdl) {
 
     root = cJSON_CreateObject();
 
-    cJSON_AddNumberToObject(root, "id_count", tdl->id_count);
     cJSON_AddItemToObject(root, "data", data = cJSON_CreateArray());
+    cJSON_AddNumberToObject(root, "id_count", tdl->id_count);
 
     item_node_t* p = tdl->item_list;
     while (p) {
@@ -27,11 +28,10 @@ error_t todolist_save(todolist_t* tdl) {
         cJSON_AddNumberToObject(item, "id", p->data->id);
         cJSON_AddNumberToObject(item, "state", p->data->state);
         cJSON_AddNumberToObject(item, "timestamp", p->data->timestamp);
-        printf("saving content is %s \n.", p->data->content);
         cJSON_AddStringToObject(item, "content", p->data->content);
         p = p->next;
     }
-
+    
     char* out_buffer = cJSON_Print(root);
     cJSON_Delete(root);
 
@@ -45,12 +45,12 @@ error_t todolist_save(todolist_t* tdl) {
 
 error_t todolist_load(todolist_t* tdl) {
     assert(tdl);
-    FILE* fin = fopen("data", "rt");
+    FILE* fin = fopen(DEFAULT_ADDRESS, "rt");
     if (!fin) {
         perror("Loading");
         return FAILURE;
     }
-
+    
     // reset the todolist
     destroy_item_list(&(tdl->item_list));
     create_item_list(&(tdl->item_list));
@@ -89,3 +89,4 @@ error_t todolist_load(todolist_t* tdl) {
     
     return SUCCESS;
 }
+

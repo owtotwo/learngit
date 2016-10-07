@@ -58,26 +58,36 @@ error_t service_get_n_items_by_state(todolist_t* tdl, item_node_t** item_list,
 
 // consume arg1=id
 static int filter_by_id(const item_t* item, va_list ap) {
+    va_list vl;
+    va_copy(vl, ap);
 
-    int item_id = va_arg(ap, int);
+    int item_id = va_arg(vl, int);
     int result = (item_id == item->id ? 1 : 0);
 
+    va_end(vl);
     return result;
 }
 
 static int filter_by_keyword(const item_t* item, va_list ap) {
+    va_list vl;
+    va_copy(vl, ap);
 
-    const char* item_keyword = va_arg(ap, const char*);
+    const char* item_keyword = va_arg(vl, const char*);
     int result = (strstr(item->content, item_keyword) != NULL ? 1 : 0);
 
+    va_end(vl);
     return result;
 }
 
 static int filter_by_nothing(const item_t* item, va_list ap) { return 1; }
 
 static int filter_by_state(const item_t* item, va_list ap) {
-    item_state_t state = va_arg(ap, item_state_t);
+    va_list vl;
+    va_copy(vl, ap);
+
+    item_state_t state = va_arg(vl, item_state_t);
     int result = (state == item->state ? 1 : 0);
 
+    va_end(vl);
     return result;
 }
