@@ -17,7 +17,6 @@ try:
 except ValueError as err:
     exit("Usage: script <file>")
 
-
 # get the content in file
 content = ""
 try:
@@ -26,26 +25,19 @@ try:
 except IOError as err:
     exit("File '" + filename + "' not found")
 
-
 # cut the content by regex and count the words
-words = re.findall(r"[a-zA-Z]+['_\-/]?[a-zA-Z]+", content)
-map(lambda x: x if (x.islower() or x.lower() not in words)
+words_iter = re.finditer(r"(?P<word>[a-zA-Z]+(['_\-/]?[a-zA-Z]+)*)\b", content)
+words = [i.group('word').encode('ascii','ignore') for i in words_iter]
+words = map(lambda x: x if (x.islower() or x.lower() not in words)
     else x.lower(), words)
 words_count = Counter(words).items()
 
-
 # sort it, the most counts is on the top, while 
 #    on lexicographical order when they have the same counts.
-words_count.sort(cmp=
-    lambda (w1, c1), (w2, c2): 
-        (1 if c1 < c2 else -1) if c1 != c2 else 
-            (1 if w1.lower() > w2.lower() else -1))
-
+words_count.sort(key=lambda x: (-x[1], str.lower(x[0])))
 
 # pretty print
-output_format = " {word:<20}{count:>5}"
-print output_format.format(word='Word', count='Count')
-print ""
+output_format = "  {word:<20} {count:<6}"
+print output_format.format(word='words', count='count')
 for i, j in words_count:
     print output_format.format(word=i, count=j)
-
