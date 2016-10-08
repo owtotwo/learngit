@@ -1,6 +1,6 @@
 # Task 7 #
 `Copyright (c) 2016 sysu_AT`  
-`* Edited on 2016-10-08.`
+
 
 ## Details ##
 * 主题: 用标准Python2.7(只允许使用其标准库)重新实现中山大学2015届软件工程初级实训的Agenda项目。
@@ -34,3 +34,4 @@
 **2016-10-16**
 
 
+`Edited by AT on 2016-10-08.`
