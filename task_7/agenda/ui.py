@@ -1,7 +1,9 @@
 class UI(object):
     """The _agendaUI Class in _agenda."""
-    def __init__(self):
-        pass
+    def __init__(self，username, password, service):
+        self.username = username
+        self.password = password
+        self.service = service
 
     def operation_loop(self):
         print "Running Operation Loop..."
@@ -12,7 +14,7 @@ class UI(object):
     def _get_operation(self):
         pass
         
-    def _execute_operation(self):
+    def _execute_operation(operation):
         pass
         
     def _user_log_in(self):
@@ -57,6 +59,5 @@ class UI(object):
     def _delete_all_meetings(self):
         pass
         
-    def _print_meetings(self):
+    def _print_meetings(self, meetings):
         pass
-    
