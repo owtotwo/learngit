@@ -1,0 +1,4 @@
+*.pyc
+data/*
+agenda/include/*
+!data/.gitignore
