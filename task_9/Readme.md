@@ -11,3 +11,5 @@ time waste and output it on screen. (The efficiency of your code must be
 better than my cpp code in the situation of the big-scale data testing.)
 
 PS: The code-style and comments are as important as the code-efficiency.
+
+Reference: https://en.wikipedia.org/wiki/Compatibility_of_C_and_C%2B%2B
