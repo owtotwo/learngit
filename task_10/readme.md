@@ -34,6 +34,8 @@ ps: 请单独开一个repository，每一part单独一个分支。
 * Client界面不重要，命令行即可。
 * 注意好逻辑切分，项目结构安排（代码文件组织）。
 * 注意错误处理。（如网络不佳传输中断，服务器未开启，数据库连接失败等）
-* reference: https://docs.python.org/2/library/socket.html
-（认真阅读Example部分并先做简单的例子代码练习）
+* references: 
+  - https://docs.python.org/2/library/socket.html
+    （认真阅读Example部分并先做简单的例子代码练习）  
+  - https://en.wikipedia.org/wiki/Network_socket
 * deadline: 2016-11-25/21:00
