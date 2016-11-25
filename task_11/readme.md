@@ -11,7 +11,7 @@
   + [知乎用户车小胖专栏](https://zhuanlan.zhihu.com/p/22516664)（这个看不懂很正常）
   + [看这个知乎问题的Raynor的回答](https://www.zhihu.com/question/22017267)
 - 使用Linux系统的telnet命令进行初步实践部分
-  + 利用telnet访问并获取中山大学官方网站主页(http://www.sysu.edu.cn/)的html代码内容。
+  + 利用telnet访问并获取中山大学官方网站主页( http://www.sysu.edu.cn/ )的html代码内容。
     （利用好chrome浏览器的F12的开发人员工具，注意Network部分的内容，来弄清楚浏览器的请
     求行为细节）
   + 利用telnet的GET指令访问 [http://owtotwo.top:8080/](http://owtotwo.top:8080/)
